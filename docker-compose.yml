@@ -1,0 +1,31 @@
+version: "3"
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: webscreenshoter-redis
+    restart: unless-stopped
+    networks:
+      - screenshoter
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  webscreenshoter:
+    image: madesupardi2/webscreenshoter:latest
+    container_name: webscreenshoter
+    restart: unless-stopped
+    ports:
+      - "1338:1338"
+    networks:
+      - screenshoter
+    env_file: .env
+    depends_on:
+      redis:
+        condition: service_healthy
+
+networks:
+  screenshoter:
+    name: Screenshoter
+    driver: bridge

@@ -1,5 +1,6 @@
 const express = require('express');
 const PuppeteerService = require('./src/services/puppeteer');
+const JobScraperService = require('./src/services/jobscraper');
 const basicAuth = require("express-basic-auth");
 
 const app = express();
@@ -19,6 +20,16 @@ app.post('/process', basicAuth({ challenge: true, users: { ["portolabs-admin"]: 
 
   try {
     await PuppeteerService.pushToQueue(url, portokuAssetId);
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error('Error processing Puppeteer request:', error);
+    res.status(500).json({ sucess: false, error: 'Internal server error' });
+  }
+});
+
+app.post('/job-scraper', basicAuth({ challenge: true, users: { ["portolabs-admin"]: process.env.KEY ?? "admin" } }), async (req, res) => {
+  try {
+    await JobScraperService.processTask();
     res.status(200).json({ success: true });
   } catch (error) {
     console.error('Error processing Puppeteer request:', error);
