@@ -36,20 +36,3 @@ jobs:
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/webscreenshoter:latest -f Dockerfile .
           docker push ${{ secrets.DOCKER_USERNAME }}/webscreenshoter:latest
-  
-  deploy:
-    needs: [build]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.DROPLET_IP }}
-          username: ${{ secrets.DROPLET_USERNAME }}
-          port: ${{secrets.DROPLET_PORT}}
-          password: ${{ secrets.DROPLET_PASSWORD }}
-          script: |
-            docker pull ${{ secrets.DOCKER_USERNAME }}/webscreenshoter:latest
-            docker stop webscreenshoter || true
-            docker rm webscreenshoter || true
-            docker run --add-host host.docker.internal:host-gateway --network n8n_redis_net -d --name webscreenshoter -p 1338:1338 ${{ secrets.DOCKER_USERNAME }}/webscreenshoter:latest
