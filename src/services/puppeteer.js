@@ -130,6 +130,22 @@ class PuppeteerService {
     }
   }
 
+  // Screenshot a URL and return a base64 data URL
+  static async screenshotToDataUrl(url) {
+    const browser = await this.getBrowserInstance();
+    const page = await browser.newPage();
+    try {
+      await page.setViewport({ width: 1280, height: 800 });
+      await page.goto(url, { waitUntil: 'networkidle0', timeout: 30000 });
+      const base64 = await page.screenshot({ encoding: 'base64' });
+      await page.close();
+      return `data:image/png;base64,${base64}`;
+    } catch (error) {
+      await page.close();
+      throw error;
+    }
+  }
+
   // Close the browser instance
   static async closeBrowser() {
     if (this.browser) {
